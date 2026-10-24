@@ -1,0 +1,31 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Node.js
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Editors and operating system
+.DS_Store
+.idea/
+.vscode/

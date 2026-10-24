@@ -1,0 +1,314 @@
+{
+  "summary": {
+    "input_rows": {
+      "part1": 16,
+      "part2": 13
+    },
+    "unique_ids": 25,
+    "ids_in_multiple_sources": 4,
+    "duplicate_rows_within_a_source": 0,
+    "dropped_records": 0,
+    "conflicts": 1,
+    "filled_from_other_source": 4,
+    "duration_corrections": 3,
+    "cleaning_issues_by_type": {
+      "duration_correction": 3,
+      "invalid_value": 3,
+      "missing_value": 3,
+      "title_trimmed": 1,
+      "type_coercion": 2
+    }
+  },
+  "schema": {
+    "part1": {
+      "columns": [
+        "acousticness",
+        "danceability",
+        "duration_ms",
+        "energy",
+        "id",
+        "mood",
+        "num_sections",
+        "num_segments",
+        "tempo",
+        "title"
+      ],
+      "fields_not_provided": [
+        "valence"
+      ]
+    },
+    "part2": {
+      "columns": [
+        "acousticness",
+        "danceability",
+        "duration_ms",
+        "energy",
+        "id",
+        "mood",
+        "num_sections",
+        "num_segments",
+        "tempo",
+        "title",
+        "valence"
+      ],
+      "fields_not_provided": []
+    }
+  },
+  "conflicts": [
+    {
+      "id": "4uLU6hMCjMI75M1A2tKUQC",
+      "title": "Never Gonna Give You Up",
+      "field": "danceability",
+      "chosen_source": "part1",
+      "chosen_row": "13",
+      "chosen_value": 0.727,
+      "chosen_original": 0.727,
+      "other_source": "part2",
+      "other_row": "1",
+      "other_value": 0.74,
+      "other_original": 0.74,
+      "reason": "sources disagree; part1 takes precedence"
+    }
+  ],
+  "filled_from_other_source": [
+    {
+      "id": "2takcwOaAZWiXQijPHIx7B",
+      "field": "valence",
+      "primary_source": "part1",
+      "primary_row": "12",
+      "primary_status": "column_not_provided",
+      "primary_original": null,
+      "primary_reason": null,
+      "filled_from": "part2",
+      "filled_from_row": "0",
+      "value": 0.31,
+      "original": 0.31,
+      "reason": "part1 does not provide this column; used part2 value"
+    },
+    {
+      "id": "4uLU6hMCjMI75M1A2tKUQC",
+      "field": "valence",
+      "primary_source": "part1",
+      "primary_row": "13",
+      "primary_status": "column_not_provided",
+      "primary_original": null,
+      "primary_reason": null,
+      "filled_from": "part2",
+      "filled_from_row": "1",
+      "value": 0.44,
+      "original": 0.44,
+      "reason": "part1 does not provide this column; used part2 value"
+    },
+    {
+      "id": "6DCZcSspjsKoFjzjrWoCEA",
+      "field": "valence",
+      "primary_source": "part1",
+      "primary_row": "14",
+      "primary_status": "column_not_provided",
+      "primary_original": null,
+      "primary_reason": null,
+      "filled_from": "part2",
+      "filled_from_row": "2",
+      "value": 0.22,
+      "original": 0.22,
+      "reason": "part1 does not provide this column; used part2 value"
+    },
+    {
+      "id": "7qiZfU4dY1lWllzX7mPBI3",
+      "field": "valence",
+      "primary_source": "part1",
+      "primary_row": "15",
+      "primary_status": "column_not_provided",
+      "primary_original": null,
+      "primary_reason": null,
+      "filled_from": "part2",
+      "filled_from_row": "3",
+      "value": 0.55,
+      "original": 0.55,
+      "reason": "part1 does not provide this column; used part2 value"
+    }
+  ],
+  "duration_corrections": [
+    {
+      "id": "3KkXRkHbMCARz0aVfEt68P",
+      "source": "part2",
+      "row": "5",
+      "field": "duration_ms",
+      "issue": "duration_correction",
+      "original": 158,
+      "value": 158000,
+      "reason": "treated_as_seconds: value<1000, x1000 gives a plausible song length and 282 ms/segment (accepted 100-600)"
+    },
+    {
+      "id": "4VqPOruhp5EdPBeR92t6lQ",
+      "source": "part2",
+      "row": "9",
+      "field": "duration_ms",
+      "issue": "duration_correction",
+      "original": 270,
+      "value": 270000,
+      "reason": "treated_as_seconds: value<1000, x1000 gives a plausible song length and 267 ms/segment (accepted 100-600)"
+    },
+    {
+      "id": "2QjOHCTQ1Jl3zawyYOpxh6",
+      "source": "part2",
+      "row": "11",
+      "field": "duration_ms",
+      "issue": "duration_correction",
+      "original": 356,
+      "value": 356000,
+      "reason": "treated_as_seconds: value<1000, x1000 gives a plausible song length and 239 ms/segment (accepted 100-600)"
+    }
+  ],
+  "cleaning_issues": [
+    {
+      "id": "5vYA1mW9g2Coh1HUFUSmlb",
+      "source": "part1",
+      "row": "0",
+      "field": "danceability",
+      "issue": "type_coercion",
+      "original": "0.521",
+      "value": 0.521,
+      "reason": "numeric_string_converted"
+    },
+    {
+      "id": "5vYA1mW9g2Coh1HUFUSmlb",
+      "source": "part1",
+      "row": "0",
+      "field": "tempo",
+      "issue": "type_coercion",
+      "original": "108.73",
+      "value": 108.73,
+      "reason": "numeric_string_converted"
+    },
+    {
+      "id": "2klCjJcucgGQysgH170npL",
+      "source": "part1",
+      "row": "1",
+      "field": "title",
+      "issue": "title_trimmed",
+      "original": " 4 walls  ",
+      "value": "4 walls",
+      "reason": "surrounding_whitespace_removed"
+    },
+    {
+      "id": "093PI3mdUvOSlvMYDwnV1e",
+      "source": "part1",
+      "row": "2",
+      "field": "energy",
+      "issue": "missing_value",
+      "original": null,
+      "value": null,
+      "reason": "missing_key"
+    },
+    {
+      "id": "64yrDBpcdwEdNY9loyEGbX",
+      "source": "part1",
+      "row": "3",
+      "field": "danceability",
+      "issue": "invalid_value",
+      "original": 1.42,
+      "value": null,
+      "reason": "out_of_range_0_to_1"
+    },
+    {
+      "id": "1hKdDCpiI9mqz1jVHRKG0E",
+      "source": "part1",
+      "row": "6",
+      "field": "acousticness",
+      "issue": "missing_value",
+      "original": null,
+      "value": null,
+      "reason": "null"
+    },
+    {
+      "id": "0VjIjW4GlUZAMYd2vXMi3b",
+      "source": "part1",
+      "row": "8",
+      "field": "tempo",
+      "issue": "invalid_value",
+      "original": 0,
+      "value": null,
+      "reason": "tempo_not_positive"
+    },
+    {
+      "id": "3AJwUDP919kvQ9QcozQPxg",
+      "source": "part1",
+      "row": "10",
+      "field": "energy",
+      "issue": "missing_value",
+      "original": "N/A",
+      "value": null,
+      "reason": "placeholder_string"
+    },
+    {
+      "id": "3JvKfv6T31zO0ini8iNItO",
+      "source": "part2",
+      "row": "7",
+      "field": "acousticness",
+      "issue": "invalid_value",
+      "original": -0.05,
+      "value": null,
+      "reason": "out_of_range_0_to_1"
+    }
+  ],
+  "duplicate_titles": [
+    {
+      "title": "Perfect",
+      "titles": [
+        "Perfect"
+      ],
+      "ids": [
+        "0tgVpDi06FyKpA1z0VMD4v",
+        "7dNsHhGeGU5MV01r06O8gK"
+      ],
+      "action": "kept_all_records: ids differ, so they are treated as distinct songs"
+    }
+  ],
+  "dropped_records": [],
+  "rules": {
+    "dedupe_key": "id (surrounding whitespace trimmed)",
+    "precedence": [
+      "part1",
+      "part2"
+    ],
+    "conflict_rule": "both sources have a valid value and they differ: the earlier source in 'precedence' is kept and the disagreement is listed under 'conflicts'",
+    "fill_rule": "the kept source has no value for a field (column_not_provided, missing_value or invalid_value) and a later source has a valid one: the later source's value is used and listed under 'filled_from_other_source' with the kept source's original value and reason. A later source never overrides a valid earlier value.",
+    "null_like_values": {
+      "forms": [
+        "missing_key",
+        "null",
+        "empty_string",
+        "placeholder_string"
+      ],
+      "placeholder_strings": [
+        "n/a",
+        "na",
+        "nan",
+        "none",
+        "null"
+      ],
+      "note": "matched case-insensitively after trimming; an empty or whitespace-only string is empty_string"
+    },
+    "numeric_string_format": "[+-]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+)",
+    "duplicate_title_key": "NFKC-normalized, casefolded, whitespace-collapsed; diacritics are not folded",
+    "unit_interval_fields": [
+      "danceability",
+      "energy",
+      "acousticness",
+      "valence"
+    ],
+    "tempo_valid_range_bpm": "(0, 400]",
+    "duration_seconds_rule": {
+      "suspect_below_ms": 1000,
+      "plausible_song_ms": [
+        30000,
+        1800000
+      ],
+      "plausible_ms_per_segment": [
+        100.0,
+        600.0
+      ]
+    }
+  }
+}

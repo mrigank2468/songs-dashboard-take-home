@@ -95,18 +95,16 @@ Inputs: `songs_part1.json` (16 rows) and `songs_part2.json` (13 rows), column-or
   ignored. Every `/songs` request reads all ratings, which is fine at this size. Anything beyond one host would
   need a real database.
 
-## AI-assisted review and changes (only what happened in the sessions)
+## Deliberately Deferred
 
-- **Environment.** The AI diagnosed a broken Homebrew `pyexpat` and proposed fixes. The first two (update
-  Homebrew and Python, rebuild the venv) did not help. The `DYLD_LIBRARY_PATH` workaround worked in a test but
-  was not adopted (later instructions ruled it out); a `uv`-managed Python was used instead. Recreating `backend/.venv` went against the instruction not to recreate it, so the AI asked
-  first and recreated it only after approval.
-- **Normalizer review.** The AI reviewed its own normalizer on request. It found minor bugs and gaps: a
-  within-file duplicate id was counted as appearing in multiple sources, `"1_0"` was accepted as a number, the
-  `valence` fill reason was misleading, a fill dropped the invalid original value, and duplicate-title detection
-  was case-sensitive. These were fixed in a follow-up prompt, with regression tests; the normalized data did not change.
-- **Tests were checked for usefulness.** The AI injected bugs into scratch copies of the code (page-only
-  sorting, a lossy ratings write, wrong filter order, wildcard CORS and others) and confirmed the suite fails each
-  time. One of its own tests rested on a wrong assumption about the test data and was rewritten, and a test that
-  would have failed for anyone who had run the app was replaced by a session-level check.
-- **`sources` removed from the response** at the user's request after the first API version exposed it.
+Given the three-hour time constraint, I prioritized core functionality and overall application verification over additional features and deeper API testing.
+
+- **Charts and visualizations:** Deferred to focus on the core dashboard workflows: search, sorting, pagination, ratings, and CSV export.
+- **Dedicated API edge-case testing:** I manually verified the overall application, but did not systematically test invalid inputs, negative values, and other API edge cases using Postman.
+- **Production hardening:** Production-level logging, health checks, database backup/recovery, and load testing remain areas for improvement.
+
+### With More Time
+
+I would first test API validation and error responses with invalid inputs and boundary values, then strengthen production-readiness checks. After that, I would add useful charts and visualizations based on the song data.
+
+

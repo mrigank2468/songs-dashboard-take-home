@@ -1,7 +1,8 @@
 # Songs dashboard take-home
 
 A FastAPI backend that serves a cleaned song catalog with pagination, global sorting,
-title search and persistent star ratings. The React frontend (`frontend/`) has not been started.
+title search and persistent star ratings, and a React dashboard (`frontend/`) for browsing,
+searching, sorting, rating and exporting the songs.
 
 The catalog comes from two inconsistent exports (`backend/data/songs_part1.json`,
 `songs_part2.json`). A normalizer merges them into `backend/data/songs_normalized.json`
@@ -23,6 +24,10 @@ backend/
   data/             source exports, normalized dataset, quality report (ratings.db appears here at runtime)
   tests/
   requirements.txt  fastapi, uvicorn, pytest, httpx
+frontend/           React + TypeScript + Vite + MUI dashboard
+  src/api.ts        API types and calls (the only code that talks to the backend)
+  src/App.tsx       state and data loading; SongTable.tsx, RatingSelect.tsx are the UI pieces
+  src/csv.ts        CSV building and download
 ```
 
 ## Setup
@@ -47,6 +52,55 @@ development machine had a `pyexpat` that did not match macOS's system `libexpat`
 broke `venv`/`ensurepip`; uv's build bundles its own expat. If your Python works, plain
 `python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt` is fine.
 
+## Run the dashboard
+
+Start the backend (below) and the frontend together. The frontend needs Node 20+ (built with Node 22).
+
+```bash
+cd frontend
+npm install
+cp .env.example .env               # optional: only needed to change the API address
+npm run dev                        # http://localhost:5173
+```
+
+| Command (in `frontend/`) | Purpose |
+|---|---|
+| `npm run dev` | dev server on port 5173 (fails if the port is taken, see CORS) |
+| `npm run build` | type-check and build into `dist/` |
+| `npm test` | run the frontend tests once (`npm run test:watch` to watch) |
+| `npm run lint` | lint |
+
+**Configuration:** `VITE_API_BASE_URL` is the backend address; it defaults to `http://localhost:8000`
+(see `frontend/.env.example`). Vite reads it at start-up, so restart the dev server after changing it.
+The dev server is pinned to port 5173 because the backend's CORS setting only allows
+`http://localhost:5173` and `http://127.0.0.1:5173`.
+
+**Features**
+
+- Songs table, 10 per page, with loading, error (with Retry) and empty-result states and
+  "1-10 of 25 · page 1 of 3" pagination.
+- Columns: title, tempo, danceability, energy, mood, duration (m:ss), valence, rating. Missing values show "—".
+  The song id is used for API calls but is not displayed.
+- Sorting from the column headers (MUI `TableSortLabel`): the first click sorts ascending, repeated clicks toggle.
+  Sorting is done by the server on the whole dataset before paging, and always returns to page 1.
+- Title search, debounced by 300 ms, returns to page 1. It uses the backend's rule: exact title, ignoring case,
+  outer whitespace and repeated inner spaces, so every song with that title is shown. A blank box means no filter.
+  Superseded requests are cancelled and a late response can never replace a newer one.
+- Rating dropdown per song (Unrated, 1-5), saved with `PUT /songs/{id}/rating`. The control is disabled while saving,
+  shows the new value only once the server confirms, and shows an error message if saving fails.
+- "Export this page (CSV)" downloads `songs.csv` with the songs currently shown, in the order shown.
+  Columns are the displayed ones, headed by their API field names (`title,tempo,danceability,energy,mood,duration_ms,valence,rating`).
+  Values are the raw API values (duration in milliseconds, not rounded), missing values are empty fields,
+  fields with commas, quotes or line breaks are quoted per RFC 4180, and the file starts with a UTF-8 BOM so Excel reads accented titles correctly.
+
+**Frontend limitations**
+
+- A rating cannot be removed: the API has no delete, so "Unrated" is shown for unrated songs but is disabled once a song is rated.
+- "Mood" is shown as the raw 0/1 from the data; the data does not say what the values mean.
+- The CSV covers the current page only, as requested, and does not guard against spreadsheet formula injection
+  (a title starting with `=`, `+`, `-` or `@`).
+- The UI is tested with a mocked API (`src/test/fakeApi.ts`); the real backend was exercised separately by hand.
+
 ## Run the API
 
 ```bash
@@ -61,8 +115,8 @@ or `--app-dir backend`). A missing or invalid data file stops startup with an er
 ## Run the tests
 
 ```bash
-cd backend
-python -m pytest                   # the whole suite
+cd backend && python -m pytest     # backend suite
+cd frontend && npm test            # frontend suite
 ```
 
 Tests never touch `data/ratings.db`; a session fixture fails the run if they do.

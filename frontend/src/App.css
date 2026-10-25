@@ -1,0 +1,31 @@
+.app {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.search {
+  flex: 1 1 280px;
+  max-width: 420px;
+}
+
+.table-wrap.loading {
+  opacity: 0.5;
+}
+
+.placeholder {
+  min-height: 160px;
+}
+
+.rating-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

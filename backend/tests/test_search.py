@@ -47,7 +47,7 @@ def titles_client(tmp_path):
 
 @pytest.mark.parametrize("query", ["Perfect", "perfect", "PERFECT", "pErFeCt", "  perfect  ", "\tPerfect\n"])
 def test_match_ignores_case_and_surrounding_whitespace(titles_client, query):
-    assert ids(search(titles_client, query)) == ["id000", "id001", "id002"]
+    assert ids(search(titles_client, query)) == ["id000", "id001", "id002", "id003"]
 
 
 @pytest.mark.parametrize(
@@ -61,16 +61,16 @@ def test_match_ignores_differences_in_runs_of_internal_whitespace(titles_client,
 
 def test_all_matches_are_returned_because_titles_are_not_unique(titles_client):
     body = search(titles_client, "perfect")
-    assert body["total"] == 3
-    assert len({s["id"] for s in body["songs"]}) == 3
-    assert {s["title"] for s in body["songs"]} == {"Perfect", "perfect", "  PERFECT "}  # titles are not rewritten
+    assert body["total"] == 4
+    assert len({s["id"] for s in body["songs"]}) == 4
+    assert {s["title"] for s in body["songs"]} == {"Perfect", "perfect", "  PERFECT ", "Perfect Day"}  # titles are not rewritten
 
 
-def test_match_is_exact_not_a_substring_search(titles_client):
-    assert ids(search(titles_client, "Perf")) == []
-    assert ids(search(titles_client, "Day")) == []
+def test_match_is_a_substring_search(titles_client):
+    assert ids(search(titles_client, "Perf")) == ["id000", "id001", "id002", "id003"]
+    assert ids(search(titles_client, "day")) == ["id003"]
     assert ids(search(titles_client, "Perfect Day")) == ["id003"]
-    assert ids(search(titles_client, "21")) == ["id007"]  # not "21 Guns"
+    assert ids(search(titles_client, "21")) == ["id007", "id008"]
     assert ids(search(titles_client, "21 guns")) == ["id008"]
 
 
@@ -222,8 +222,9 @@ def test_real_dataset_whitespace_padded_title_was_normalized_and_is_searchable(r
     assert [s["title"] for s in body["songs"]] == ["4 walls"]
 
 
-def test_real_dataset_exact_match_does_not_return_longer_titles(real_client):
-    assert [s["title"] for s in real_client.get("/songs", params={"title": "21"}).json()["songs"]] == ["21"]
+def test_real_dataset_partial_title_matches_longer_titles(real_client):
+    titles = [s["title"] for s in real_client.get("/songs", params={"title": "21", "size": 100}).json()["songs"]]
+    assert "21" in titles and all("21" in t for t in titles)
     assert [s["title"] for s in real_client.get("/songs", params={"title": "Naïve"}).json()["songs"]] == ["Naïve"]
 
 

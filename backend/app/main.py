@@ -95,7 +95,7 @@ def create_app(
         title: str | None = Query(
             None,
             description=(
-                "Exact title match, ignoring case, surrounding whitespace and repeated inner whitespace. "
+                "Title substring match, ignoring case, surrounding whitespace and repeated inner whitespace. "
                 "Empty or whitespace-only means no filter."
             ),
         ),

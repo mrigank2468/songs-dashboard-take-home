@@ -113,7 +113,7 @@ export default function App() {
       <Box className="toolbar">
         <TextField
           label="Search by title"
-          helperText="Exact title, ignoring case and extra spaces"
+          helperText="Part of a title, ignoring case and extra spaces"
           size="small"
           type="search"
           value={searchInput}

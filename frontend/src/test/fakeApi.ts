@@ -17,7 +17,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
 /**
- * A stand-in for the backend: GET /songs filters (exact title, normalized), sorts (nulls last,
+ * A stand-in for the backend: GET /songs filters (title substring, normalized), sorts (nulls last,
  * ties by id) and paginates; PUT /songs/{id}/rating stores a rating. `calls` records every request.
  * A test can intercept requests with `override` (return undefined to fall through to the default).
  */
@@ -31,7 +31,7 @@ export function installFakeApi(initial: Song[]) {
     const page = Number(p.get('page') ?? 1)
     const size = Number(p.get('size') ?? 10)
     const title = p.get('title')
-    let rows = title && key(title) ? songs.filter((s) => s.title !== null && key(s.title) === key(title)) : [...songs]
+    let rows = title && key(title) ? songs.filter((s) => s.title !== null && key(s.title).includes(key(title))) : [...songs]
     const field = p.get('sort_by') as keyof Song | null
     if (field) {
       const dir = p.get('order') === 'desc' ? -1 : 1

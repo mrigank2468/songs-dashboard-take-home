@@ -60,11 +60,11 @@ Inputs: `songs_part1.json` (16 rows) and `songs_part2.json` (13 rows), column-or
 - **Deterministic ties: by `id` ascending, in both directions. [requested: deterministic]** Results do not
   depend on the order of the data file. Titles sort case-insensitively **[AI choice]**; ids sort case-sensitively.
   No locale-aware collation, so accented letters sort after `z`.
-- **Title search is an exact match, not a substring search. [AI choice, needs approval]** The request
-  described case-insensitive matching that ignores outer whitespace and whitespace runs and returns every
-  match because titles repeat, which reads as a lookup. `title=perfect` returns both "Perfect" songs;
-  `title=21` does not return "21 Guns". The comparison reuses the normalizer's title key (Unicode NFKC, case-folded,
-  whitespace collapsed). Switching to substring matching is a one-line change in `app/search.py`.
+- **Title search is a substring match. [changed from exact match after a bug report]** Typing part of a title
+  (e.g. "Perf") must find the song on any page, so a search matches when the normalized title contains the
+  normalized query. `title=perfect` returns both "Perfect" songs (and e.g. "Perfect Day"); `title=21` also
+  returns "21 Guns". The comparison reuses the normalizer's title key (Unicode NFKC, case-folded,
+  whitespace collapsed).
 - **Blank `title` means no filter. [AI choice, needs approval]** `title=` and `title=%20` behave as if the
   parameter was omitted, which suits a cleared search box. Songs with a null title never match a real search.
 - **Operation order: filter, sort, paginate. [requested]** `total` and `total_pages` describe the filtered set.

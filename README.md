@@ -83,8 +83,8 @@ The dev server is pinned to port 5173 because the backend's CORS setting only al
   The song id is used for API calls but is not displayed.
 - Sorting from the column headers (MUI `TableSortLabel`): the first click sorts ascending, repeated clicks toggle.
   Sorting is done by the server on the whole dataset before paging, and always returns to page 1.
-- Title search, debounced by 300 ms, returns to page 1. It uses the backend's rule: exact title, ignoring case,
-  outer whitespace and repeated inner spaces, so every song with that title is shown. A blank box means no filter.
+- Title search, debounced by 300 ms, returns to page 1. It uses the backend's rule: part of a title, ignoring case,
+  outer whitespace and repeated inner spaces, so every song containing that text is shown. A blank box means no filter.
   Superseded requests are cancelled and a late response can never replace a newer one.
 - Rating dropdown per song (Unrated, 1-5), saved with `PUT /songs/{id}/rating`. The control is disabled while saving,
   shows the new value only once the server confirms, and shows an error message if saving fails.
@@ -133,7 +133,7 @@ Rebuild the normalized data (not needed normally, the output is committed):
 | `size` | 10 | integer 1-100 |
 | `sort_by` | none (dataset order) | `id`, `title`, `danceability`, `energy`, `mood`, `acousticness`, `tempo`, `duration_ms`, `num_sections`, `num_segments`, `valence`, `rating` |
 | `order` | `asc` | `asc` or `desc`; ignored without `sort_by` |
-| `title` | none | exact title match, ignoring case, outer whitespace and repeated inner whitespace; empty or blank means no filter |
+| `title` | none | title substring match, ignoring case, outer whitespace and repeated inner whitespace; empty or blank means no filter |
 
 Order of operations: filter by title, sort the whole result, then take the page.
 `total` and `total_pages` describe the filtered set. Songs with a null value for the sort field come

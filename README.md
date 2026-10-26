@@ -30,36 +30,71 @@ frontend/           React + TypeScript + Vite + MUI dashboard
   src/csv.ts        CSV building and download
 ```
 
-## Setup
+## Prerequisites
 
-All commands run from `backend/`. The virtual environment is `backend/.venv` (Python 3.13).
+| Tool | Version | Notes |
+|---|---|---|
+| Python | 3.11+ (developed and tested on 3.13) | the code uses `StrEnum`, added in 3.11 |
+| [uv](https://docs.astral.sh/uv/) | any recent | optional; used below to create the environment. Plain `python -m venv` also works |
+| Node.js + npm | 20+ (built with Node 22) | frontend only |
+
+The backend (port 8000) and the frontend (port 5173) are separate processes, so use two terminals.
+
+## Backend setup
+
+Run from `backend/`. The environment lives in `backend/.venv` (gitignored).
+
+**With uv (macOS, Linux, Windows):**
 
 ```bash
 cd backend
-source .venv/bin/activate          # or call .venv/bin/python directly
+uv venv --python 3.13
+uv pip install -r requirements.txt
 ```
 
-To recreate it from scratch:
+`uv pip` installs into `.venv` automatically. If you have a working Python, `uv venv` without
+`--python` uses it. If a system Python is broken (the development machine's Homebrew Python 3.13
+had a `pyexpat` that did not match macOS's `libexpat`, which broke `venv`/`ensurepip`), add
+`--managed-python` so uv downloads its own CPython.
+
+**Without uv:**
+
+| | macOS / Linux | Windows (PowerShell) |
+|---|---|---|
+| create | `python3 -m venv .venv` | `py -m venv .venv` |
+| install | `.venv/bin/pip install -r requirements.txt` | `.venv\Scripts\pip install -r requirements.txt` |
+
+**Activating** is optional; every command below can also call the venv's Python directly
+(`.venv/bin/python` on macOS/Linux, `.venv\Scripts\python` on Windows).
+
+| macOS / Linux | Windows PowerShell | Windows cmd |
+|---|---|---|
+| `source .venv/bin/activate` | `.venv\Scripts\Activate.ps1` | `.venv\Scripts\activate.bat` |
+
+`requirements.txt` lists `fastapi`, `uvicorn`, `pytest` and `httpx` (unpinned).
+
+## Run the API
 
 ```bash
 cd backend
-uv venv --python 3.13 --managed-python
-uv pip install --python .venv/bin/python -r requirements.txt
+uvicorn app.main:app --reload      # http://127.0.0.1:8000, interactive docs at /docs
 ```
 
-`--managed-python` makes uv download its own CPython. Homebrew's Python 3.13.17 on the
-development machine had a `pyexpat` that did not match macOS's system `libexpat`, which
-broke `venv`/`ensurepip`; uv's build bundles its own expat. If your Python works, plain
-`python3.13 -m venv .venv && .venv/bin/pip install -r requirements.txt` is fine.
+(With the environment not activated, use `.venv/bin/python -m uvicorn ...` or
+`.venv\Scripts\python -m uvicorn ...`.)
+
+`app.main:app` must be imported from `backend/`, so run the command there (or pass `--app-dir backend`).
+The data file and the ratings database are located relative to the code, so the working directory
+does not matter for them. A missing or invalid data file stops startup with an error naming the file.
+The backend reads no environment variables.
 
 ## Run the dashboard
 
-Start the backend (below) and the frontend together. The frontend needs Node 20+ (built with Node 22).
+Start the API first, then in a second terminal:
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env               # optional: only needed to change the API address
 npm run dev                        # http://localhost:5173
 ```
 
@@ -70,12 +105,24 @@ npm run dev                        # http://localhost:5173
 | `npm test` | run the frontend tests once (`npm run test:watch` to watch) |
 | `npm run lint` | lint |
 
-**Configuration:** `VITE_API_BASE_URL` is the backend address; it defaults to `http://localhost:8000`
-(see `frontend/.env.example`). Vite reads it at start-up, so restart the dev server after changing it.
-The dev server is pinned to port 5173 because the backend's CORS setting only allows
-`http://localhost:5173` and `http://127.0.0.1:5173`.
+**Configuration:** `VITE_API_BASE_URL` is the backend address; it defaults to `http://localhost:8000`,
+so no `.env` file is needed when the API runs on port 8000. To change it, copy `frontend/.env.example`
+to `frontend/.env` (`cp .env.example .env` on macOS/Linux, `copy .env.example .env` on Windows cmd,
+`Copy-Item .env.example .env` in PowerShell) and edit it. Vite reads it at start-up, so restart the dev
+server after changing it.
 
-**Features**
+## Run the tests
+
+```bash
+cd backend && python -m pytest     # backend suite (venv active, or use the venv's python)
+cd frontend && npm test            # frontend suite
+```
+
+Tests never touch `data/ratings.db`; a session fixture fails the run if they do.
+To rebuild the normalized data (not needed normally, the output is committed), run
+`python -m app.normalizer` from `backend/`.
+
+## Features
 
 - Songs table, 10 per page, with loading, error (with Retry) and empty-result states and
   "1-10 of 25 · page 1 of 3" pagination.
@@ -93,35 +140,16 @@ The dev server is pinned to port 5173 because the backend's CORS setting only al
   Values are the raw API values (duration in milliseconds, not rounded), missing values are empty fields,
   fields with commas, quotes or line breaks are quoted per RFC 4180, and the file starts with a UTF-8 BOM so Excel reads accented titles correctly.
 
-**Frontend limitations**
+## Known limitations
 
+- Ratings are global: there are no users, so one rating per song is shared by everyone, and the last
+  `PUT` wins. Nothing is averaged.
 - A rating cannot be removed: the API has no delete, so "Unrated" is shown for unrated songs but is disabled once a song is rated.
 - "Mood" is shown as the raw 0/1 from the data; the data does not say what the values mean.
 - The CSV covers the current page only, as requested, and does not guard against spreadsheet formula injection
   (a title starting with `=`, `+`, `-` or `@`).
-- The UI is tested with a mocked API (`src/test/fakeApi.ts`); the real backend was exercised separately by hand.
-
-## Run the API
-
-```bash
-cd backend
-uvicorn app.main:app --reload      # http://127.0.0.1:8000, interactive docs at /docs
-```
-
-The app loads `data/songs_normalized.json` from its own location, so the working directory does not
-matter for the data file (the `app.main:app` import path does need `backend/` as the working directory,
-or `--app-dir backend`). A missing or invalid data file stops startup with an error naming the file.
-
-## Run the tests
-
-```bash
-cd backend && python -m pytest     # backend suite
-cd frontend && npm test            # frontend suite
-```
-
-Tests never touch `data/ratings.db`; a session fixture fails the run if they do.
-Rebuild the normalized data (not needed normally, the output is committed):
-`python -m app.normalizer`.
+- Frontend automated tests use a mocked API (src/test/fakeApi.ts). The full application was also manually verified with the real backend.
+- CORS allows only the two Vite dev-server origins and is not configurable without editing code (see CORS).
 
 ## API
 
@@ -138,6 +166,9 @@ Rebuild the normalized data (not needed normally, the output is committed):
 Order of operations: filter by title, sort the whole result, then take the page.
 `total` and `total_pages` describe the filtered set. Songs with a null value for the sort field come
 last in both directions; ties are ordered by `id` ascending. A page past the end returns an empty list (200).
+
+The examples use `curl` with single quotes (macOS, Linux, Git Bash). On Windows use `curl.exe` (in PowerShell,
+`curl` is an alias of `Invoke-WebRequest`) with double quotes, or open the same URLs in a browser.
 
 ```bash
 curl 'localhost:8000/songs'                                  # page 1, 10 songs
@@ -174,6 +205,13 @@ curl -X PUT localhost:8000/songs/7fBv7CLKzipRk6EC6TWHOB/rating \
 # {"song_id": "7fBv7CLKzipRk6EC6TWHOB", "rating": 5}
 ```
 
+Windows PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Put -Uri http://localhost:8000/songs/7fBv7CLKzipRk6EC6TWHOB/rating `
+  -ContentType 'application/json' -Body '{"rating": 5}'
+```
+
 | Case | Response |
 |---|---|
 | `rating` is an integer 1-5 | `200` |
@@ -186,8 +224,11 @@ curl -X PUT localhost:8000/songs/7fBv7CLKzipRk6EC6TWHOB/rating \
 
 ### CORS
 
-Browsers on `http://localhost:5173` and `http://127.0.0.1:5173` (the Vite dev server) may call the API.
-Other origins get no CORS headers. Change `CORS_ORIGINS` in `app/main.py` if the frontend uses another port.
+Only browsers on `http://localhost:5173` and `http://127.0.0.1:5173` (the Vite dev server) may call the API,
+and only with `GET` and `PUT` and the `Content-Type` header. Other origins get no CORS headers.
+This is the `CORS_ORIGINS` constant in `backend/app/main.py`; edit it (and `server.port` in
+`frontend/vite.config.ts`) to serve the frontend from another origin. `curl` and other non-browser
+clients are not affected by CORS.
 
 ## Ratings storage
 
